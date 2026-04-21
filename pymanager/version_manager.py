@@ -372,16 +372,100 @@ class VersionManager:
             pass
         return None
 
+    def _make_ssl_context(self) -> "ssl.SSLContext":
+        """
+        Build an SSL context that works on macOS with python.org Python installs.
+
+        python.org Python on macOS ships without system certificates — it expects
+        you to run 'Install Certificates.command'. We work around this by trying
+        certificate sources in order:
+          1. Default context (works on Homebrew Python, Linux)
+          2. macOS system keychain via `security export`
+          3. certifi if installed
+          4. Unverified context with a warning (last resort)
+        """
+        import ssl
+
+        # Try default first — works on Homebrew Python and Linux
+        ctx = ssl.create_default_context()
+        try:
+            # Quick probe: connect to PyPI to test the context
+            import urllib.request as _ur
+            opener = _ur.build_opener(_ur.HTTPSHandler(context=ctx))
+            opener.open("https://pypi.org", timeout=5).close()
+            return ctx
+        except ssl.SSLError:
+            pass
+        except Exception:
+            # Non-SSL error (network down, timeout) — return default and let
+            # the real download fail with a meaningful message
+            return ctx
+
+        # macOS system keychain
+        if sys.platform == "darwin":
+            try:
+                import subprocess, tempfile, os
+                proc = subprocess.run(
+                    [
+                        "security", "export", "-t", "certs", "-f", "pemseq",
+                        "-k", "/System/Library/Keychains/SystemRootCertificates.keychain",
+                    ],
+                    capture_output=True,
+                    timeout=10,
+                )
+                if proc.returncode == 0 and proc.stdout:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".pem") as f:
+                        f.write(proc.stdout)
+                        tmp = f.name
+                    try:
+                        ctx = ssl.create_default_context(cafile=tmp)
+                        return ctx
+                    finally:
+                        os.unlink(tmp)
+            except Exception:
+                pass
+
+        # certifi fallback (installed alongside requests, pip, etc.)
+        try:
+            import certifi
+            return ssl.create_default_context(cafile=certifi.where())
+        except ImportError:
+            pass
+
+        # Last resort — unverified. Warn the user.
+        print(
+            "   ⚠  SSL certificate verification disabled. "
+            "Run: /Applications/Python*/Install\\ Certificates.command"
+        )
+        return ssl._create_unverified_context()
+
     def _download(self, url: str, dest: Path) -> None:
         """Download url → dest with a progress indicator."""
-        def reporthook(count, block_size, total_size):
-            if total_size > 0:
-                pct = min(int(count * block_size * 100 / total_size), 100)
-                bar = "█" * (pct // 5) + "░" * (20 - pct // 5)
-                print(f"\r     [{bar}] {pct}%", end="", flush=True)
+        import ssl
+
+        ssl_ctx = self._make_ssl_context()
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPSHandler(context=ssl_ctx)
+        )
 
         try:
-            urllib.request.urlretrieve(url, dest, reporthook)
+            with opener.open(url) as response:
+                total_size = int(response.headers.get("Content-Length", 0))
+                downloaded = 0
+                block_size = 65536  # 64 KB chunks
+
+                with open(dest, "wb") as f:
+                    while True:
+                        chunk = response.read(block_size)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                        if total_size > 0:
+                            pct = min(int(downloaded * 100 / total_size), 100)
+                            bar = "█" * (pct // 5) + "░" * (20 - pct // 5)
+                            print(f"\r     [{bar}] {pct}%", end="", flush=True)
+
             print()  # newline after progress bar
         except Exception as e:
             if dest.exists():
