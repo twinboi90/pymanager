@@ -1,5 +1,10 @@
 # pymanager
 
+[![PyPI version](https://img.shields.io/pypi/v/pymanager-cli.svg)](https://pypi.org/project/pymanager-cli/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pymanager-cli.svg)](https://pypi.org/project/pymanager-cli/)
+[![CI](https://github.com/twinboi90/pymanager/actions/workflows/ci.yml/badge.svg)](https://github.com/twinboi90/pymanager/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **One command. Any Python version. Zero configuration.**
 
 ```bash
@@ -108,7 +113,17 @@ brew install twinboi90/tap/pymanager
 
 That's it. No cloning, no PATH setup, no configuration. Homebrew handles everything.
 
-### install.sh (no Homebrew)
+### pip
+
+```bash
+pip install pymanager-cli
+```
+
+Then reload your shell (or open a new terminal window). The `pymanager` command will be available immediately.
+
+> **Note:** If `pymanager` isn't found after install, run `pymanager setup-path` to add it to your PATH automatically, then `source ~/.zshrc`.
+
+### install.sh (no Homebrew, no pip)
 
 ```bash
 git clone https://github.com/twinboi90/pymanager.git
