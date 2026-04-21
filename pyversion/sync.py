@@ -40,7 +40,7 @@ class SyncIssue(str, Enum):
 
     # Soft warnings — venv works but something is off
     PIP_OUTDATED         = "pip_outdated"            # pip is very old (< 22)
-    METADATA_MISSING     = "metadata_missing"        # no .pymanager-metadata
+    METADATA_MISSING     = "metadata_missing"        # no .pyversion-metadata
 
 
 # Group issues by severity
@@ -171,7 +171,7 @@ class SyncChecker:
             self._check_version(python, required_version, result)
 
         # ── 6. pymanager metadata ────────────────────────────────────
-        meta = venv_path / ".pymanager-metadata"
+        meta = venv_path / ".pyversion-metadata"
         if not meta.exists():
             result.warnings.append(SyncIssue.METADATA_MISSING)
 

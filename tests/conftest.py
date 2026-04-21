@@ -73,10 +73,10 @@ def _write_pyvenv_cfg(venv_dir: Path, version: str, home: str) -> Path:
 
 
 def _write_metadata(venv_dir: Path, python_version: str) -> Path:
-    """Write .pymanager-metadata."""
+    """Write .pyversion-metadata."""
     import json
     from datetime import datetime, timezone
-    meta = venv_dir / ".pymanager-metadata"
+    meta = venv_dir / ".pyversion-metadata"
     meta.write_text(json.dumps({
         "python_version": python_version,
         "created": datetime.now(timezone.utc).isoformat(),

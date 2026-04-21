@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from pymanager.sync import SyncChecker, SyncIssue, SyncResult, FATAL_ISSUES, WARNING_ISSUES
+from pyversion.sync import SyncChecker, SyncIssue, SyncResult, FATAL_ISSUES, WARNING_ISSUES
 
 
 # ---------------------------------------------------------------------------

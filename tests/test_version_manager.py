@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from pymanager.sync import SyncChecker
-from pymanager.version_manager import VersionManager
+from pyversion.sync import SyncChecker
+from pyversion.version_manager import VersionManager
 
 
 # ---------------------------------------------------------------------------
