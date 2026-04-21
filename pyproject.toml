@@ -13,6 +13,24 @@ license = { text = "MIT" }
 [project.scripts]
 pymanager = "pymanager.__main__:main"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pymanager*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["pymanager"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
