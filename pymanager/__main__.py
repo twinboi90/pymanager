@@ -23,6 +23,8 @@ from pathlib import Path
 
 from .environment_manager import EnvironmentManager
 from .pip_wrapper import PipWrapper
+from .registry import Registry
+from .sync import SyncChecker, SyncIssue
 from .version_manager import VersionManager, VERSIONS_DIR
 from . import __version__
 
@@ -103,33 +105,60 @@ class PyManager:
             python_path = self.version_mgr.get_path(required_python)
             print(f"   {green('✅')} Python {required_python} already installed")
 
-        # ── Step 3: Ensure venv ─────────────────────────────────────────
+        # ── Step 3: Sync check (before creating/touching venv) ──────────
         print()
         print(bold("📦 Setting up virtual environment..."))
         venv_path = Path.cwd() / ".venv"
 
-        try:
-            venv_path = self.env_mgr.get_or_create_venv(python_path, required_python, venv_path)
-        except RuntimeError as e:
-            print(f"   {red('❌')} Failed to create venv: {e}")
-            return 1
+        checker = SyncChecker()
+        sync = checker.check(venv_path, required_python)
 
-        print(f"   {green('✅')} Virtual environment ready: {dim(str(venv_path))}")
+        if sync.is_missing:
+            # Fresh create
+            try:
+                venv_path = self.env_mgr.get_or_create_venv(python_path, required_python, venv_path)
+            except RuntimeError as e:
+                print(f"   {red('❌')} Failed to create venv: {e}")
+                return 1
+            print(f"   {green('✅')} Virtual environment created: {dim(str(venv_path))}")
+
+        elif not sync.is_healthy:
+            # Detailed issue report before rebuilding
+            print(f"   {yellow('⚠')}  Venv has issues — rebuilding:")
+            for msg in sync.describe():
+                if "[warning]" in msg:
+                    print(f"      {yellow('·')} {msg.replace('[warning] ', '')}")
+                else:
+                    print(f"      {red('·')} {msg}")
+            try:
+                self.env_mgr.rebuild_venv(venv_path, python_path, required_python)
+                print(f"   {green('✅')} Venv rebuilt with Python {required_python}")
+            except RuntimeError as e:
+                print(f"   {red('❌')} Rebuild failed: {e}")
+                return 1
+
+        else:
+            # Healthy — surface any warnings non-blocking
+            if sync.warnings:
+                for msg in sync.describe():
+                    if "[warning]" in msg:
+                        print(f"   {yellow('·')} {msg.replace('[warning] ', '')}")
+            print(f"   {green('✅')} Virtual environment ready: {dim(str(venv_path))}")
 
         # ── Step 4: Validate sync ────────────────────────────────────────
         print()
         print(bold("✔️  Validating environment..."))
 
-        if not self.env_mgr.is_synced(venv_path, required_python):
-            print(f"   {yellow('⚠')}  Venv is out of sync with Python {required_python}. Rebuilding...")
-            try:
-                self.env_mgr.rebuild_venv(venv_path, python_path, required_python)
-                print(f"   {green('✅')} Venv rebuilt successfully")
-            except RuntimeError as e:
-                print(f"   {red('❌')} Rebuild failed: {e}")
-                return 1
-        else:
-            print(f"   {green('✅')} Environment is synced with Python {required_python}")
+        # Re-check after any repairs
+        sync = checker.check(venv_path, required_python)
+        if not sync.is_healthy:
+            print(f"   {red('❌')} Environment still has unresolved issues:")
+            for msg in sync.describe():
+                print(f"      · {msg}")
+            print(f"   Try removing .venv manually and re-running.")
+            return 1
+
+        print(f"   {green('✅')} Environment synced with Python {sync.actual_version or required_python}")
 
         # ── Step 5: Run pip ─────────────────────────────────────────────
         print()
@@ -147,6 +176,7 @@ class PyManager:
         print()
         print(f"{green('✅')} Command completed successfully")
         self.env_mgr.update_tracking(venv_path, required_python)
+        Registry().register(Path.cwd(), required_python)
 
         return 0
 
@@ -173,14 +203,23 @@ class PyManager:
             required = self.version_mgr.get_system_python()
             print(f"  {bold('Required Python:')} {required} {yellow('(no config — using system)')} ")
 
-        # Venv info
+        # Venv info via SyncChecker
         info = self.env_mgr.get_venv_info(venv_path)
         if info["exists"]:
-            synced = self.env_mgr.is_synced(venv_path, required)
-            sync_icon = green("✅ synced") if synced else yellow("⚠ out of sync")
+            sync = SyncChecker().check(venv_path, required)
+            if sync.is_healthy:
+                sync_icon = green("✅ synced")
+            elif sync.warnings and not sync.issues:
+                sync_icon = yellow("⚠ warnings")
+            else:
+                sync_icon = red("❌ issues")
             print(f"  {bold('Virtual env:')}    {venv_path} [{sync_icon}]")
-            print(f"  {bold('Venv Python:')}    {info.get('python_version', 'unknown')}")
+            print(f"  {bold('Venv Python:')}    {sync.actual_version or info.get('python_version', 'unknown')}")
             print(f"  {bold('Packages:')}       {info.get('package_count', 0)} installed")
+            if sync.issues or sync.warnings:
+                for msg in sync.describe():
+                    prefix = yellow("·") if "[warning]" in msg else red("·")
+                    print(f"    {prefix} {msg.replace('[warning] ', '')}")
             if info.get("last_used"):
                 print(f"  {bold('Last used:')}      {info['last_used']}")
         else:
@@ -197,7 +236,8 @@ class PyManager:
         """Validate everything is correct for the current project."""
         cwd = Path.cwd()
         venv_path = cwd / ".venv"
-        issues: list[str] = []
+        fatal: list[str] = []
+        warnings: list[str] = []
         ok: list[str] = []
 
         print(bold("🔎 pymanager check"))
@@ -208,7 +248,7 @@ class PyManager:
         if required:
             ok.append(f"Python requirement: {required}")
         else:
-            issues.append("No Python version requirement found (add .python-version or pyproject.toml)")
+            warnings.append("No Python version requirement found (add .python-version or pyproject.toml)")
             required = self.version_mgr.get_system_python()
 
         # Check 2: Python available
@@ -216,40 +256,42 @@ class PyManager:
             python_path = self.version_mgr.get_path(required)
             ok.append(f"Python {required} available at {python_path}")
         except RuntimeError:
-            issues.append(f"Python {required} not installed (run `pymanager pip install` to trigger install)")
+            fatal.append(f"Python {required} not installed — run `pymanager pip install` to trigger install")
             python_path = None
 
-        # Check 3: Venv exists
-        if venv_path.exists():
-            ok.append(f"Virtual environment exists at {venv_path}")
+        # Check 3–6: Full venv sync check
+        sync = SyncChecker().check(venv_path, required)
+
+        if sync.is_missing:
+            fatal.append(f"No virtual environment found at {venv_path}")
         else:
-            issues.append(f"No virtual environment found at {venv_path}")
-
-        # Check 4: Venv synced
-        if venv_path.exists():
-            if self.env_mgr.is_synced(venv_path, required):
-                ok.append(f"Venv is synced with Python {required}")
-            else:
-                issues.append(f"Venv is out of sync — was built with a different Python version")
-
-        # Check 5: pip functional
-        if venv_path.exists():
-            result = self.pip.run_captured(venv_path, ["--version"])
-            if result.returncode == 0:
-                ok.append(f"pip is functional ({result.stdout.strip()[:60]})")
-            else:
-                issues.append("pip is not functional inside venv")
+            ok.append(f"Virtual environment exists at {venv_path}")
+            for issue in sync.issues:
+                from .sync import _ISSUE_MESSAGES
+                fatal.append(_ISSUE_MESSAGES.get(issue, str(issue)))
+            for warn in sync.warnings:
+                from .sync import _ISSUE_MESSAGES
+                warnings.append(_ISSUE_MESSAGES.get(warn, str(warn)))
+            if sync.is_healthy:
+                ok.append(f"Venv synced with Python {sync.actual_version or required}")
+            if sync.pip_version:
+                ok.append(f"pip functional ({sync.pip_version})")
 
         # Print results
         for msg in ok:
             print(f"  {green('✅')} {msg}")
-        for msg in issues:
+        for msg in warnings:
+            print(f"  {yellow('⚠')}  {msg}")
+        for msg in fatal:
             print(f"  {red('❌')} {msg}")
 
         print()
-        if issues:
-            print(f"{yellow('⚠')}  {len(issues)} issue(s) found. Run `pymanager pip install` to auto-fix.")
+        if fatal:
+            print(f"{red('❌')} {len(fatal)} issue(s) found. Run `pymanager pip install` to auto-fix.")
             return 1
+        elif warnings:
+            print(f"{yellow('⚠')}  {len(warnings)} warning(s). Run `pymanager pip install` to repair.")
+            return 0
         else:
             print(f"{green('✅')} Everything looks good!")
             return 0
@@ -296,26 +338,115 @@ class PyManager:
 
     def cmd_cleanup(self) -> int:
         """Find orphaned venvs and unused Python versions."""
+        dry_run = "--dry-run" in sys.argv
+
         print(bold("🧹 pymanager cleanup"))
+        if dry_run:
+            print(f"  {dim('(dry-run mode — nothing will be deleted)')}")
         print()
-        print(dim("  Scanning ~/.pymanager/versions/..."))
+
+        registry = Registry()
+
+        # ── Prune stale registry entries ─────────────────────────────
+        stale = registry.prune_stale()
+        if stale:
+            print(f"  {dim(f'Pruned {len(stale)} stale registry entry/entries (projects no longer on disk)')}")
+            print()
+
+        # ── Scan managed Python versions ──────────────────────────────
         versions = self.version_mgr.list_installed()
+        active_versions = registry.active_versions()
+
         if not versions:
-            print(f"  {dim('No managed versions found.')}")
-        else:
-            print(f"  Found {len(versions)} managed Python version(s):")
-            for v in versions:
-                print(f"    {green('●')} Python {v['label']} — {v['path']}")
+            print(f"  {dim('No pymanager-managed Python versions installed.')}")
+            print(f"  {dim('Nothing to clean up.')}")
+            print()
+            return 0
+
+        print(f"  {bold('Managed Python versions:')}")
+        print()
+
+        to_remove: list[dict] = []
+
+        for v in versions:
+            label = v["label"]
+            actual = v.get("actual_version") or label
+            path = Path(v["path"]).parent.parent  # bin/python → version root
+            size = self._dir_size_mb(path)
+            projects = registry.projects_for_version(label)
+            active_projects = [p for p in projects if p.exists]
+
+            if active_projects:
+                status = green(f"active ({len(active_projects)} project(s))")
+            elif projects:
+                status = yellow(f"stale ({len(projects)} project(s) no longer on disk)")
+                to_remove.append(v)
+            else:
+                status = yellow("orphaned (no registered projects)")
+                to_remove.append(v)
+
+            print(f"  {bold('Python ' + actual)}  [{status}]  {dim(f'{size} MB  {path}')}")
+
+            for p in active_projects[:3]:
+                print(f"    {dim('·')} {dim(p.path)}")
+            if len(active_projects) > 3:
+                print(f"    {dim(f'  ... and {len(active_projects) - 3} more')}")
 
         print()
-        print(dim("  To remove a specific version:"))
-        print(dim(f"    rm -rf ~/.pymanager/versions/<version>"))
+
+        # ── Offer to remove orphaned/stale versions ───────────────────
+        if not to_remove:
+            print(f"  {green('✅')} All managed Python versions are in active use.")
+            print()
+            return 0
+
+        print(f"  {yellow('⚠')}  Found {len(to_remove)} version(s) with no active projects:")
+        for v in to_remove:
+            path = Path(v["path"]).parent.parent
+            size = self._dir_size_mb(path)
+            print(f"    {red('·')} Python {v['label']}  ({size} MB)  {dim(str(path))}")
+
         print()
-        print(dim("  To remove a project's venv:"))
-        print(dim(f"    rm -rf .venv"))
+
+        if dry_run:
+            print(f"  {dim('[dry-run] Would prompt to remove the above version(s).')}")
+            return 0
+
+        try:
+            answer = input(f"  Remove these {len(to_remove)} version(s)? [y/N] ").strip().lower()
+        except (KeyboardInterrupt, EOFError):
+            print("\n  Aborted.")
+            return 0
+
+        if answer != "y":
+            print(f"  {dim('Skipped. Nothing was removed.')}")
+            return 0
+
+        removed_mb = 0
+        for v in to_remove:
+            path = Path(v["path"]).parent.parent
+            size = self._dir_size_mb(path)
+            try:
+                shutil.rmtree(path)
+                removed_mb += size
+                print(f"  {green('✅')} Removed Python {v['label']}  ({size} MB freed)")
+            except Exception as e:
+                print(f"  {red('❌')} Failed to remove {path}: {e}")
+
         print()
-        print(f"{yellow('Note:')} Interactive cleanup (auto-remove unused) is coming in Phase 2.")
+        print(f"  {green('✅')} Done. {removed_mb} MB freed.")
         return 0
+
+    def _dir_size_mb(self, path: Path) -> int:
+        """Return approximate directory size in MB."""
+        total = 0
+        try:
+            for f in path.rglob("*"):
+                if f.is_file() and not f.is_symlink():
+                    total += f.stat().st_size
+        except Exception:
+            pass
+        return total // (1024 * 1024)
 
     # ------------------------------------------------------------------
     # init

@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+wheels/
+
+# Virtual environments (pymanager creates these in projects)
+.venv/
+venv/
+env/
+
+# pymanager internals
+.pymanager-saved-reqs.txt
+.pymanager-metadata
+
+# Distribution / packaging
+MANIFEST
+pip-wheel-metadata/
+share/python-wheels/
+*.dist-info/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.env
+.env.*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
