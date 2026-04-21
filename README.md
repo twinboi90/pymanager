@@ -100,7 +100,15 @@ $ pymanager pip install -r requirements.txt
 
 ## Install
 
-### Recommended (one-liner)
+### Homebrew (recommended)
+
+```bash
+brew install twinboi90/tap/pymanager
+```
+
+That's it. No cloning, no PATH setup, no configuration. Homebrew handles everything.
+
+### install.sh (no Homebrew)
 
 ```bash
 git clone https://github.com/twinboi90/pymanager.git
@@ -120,7 +128,7 @@ Then reload your shell:
 source ~/.zshrc   # or ~/.bash_profile for bash
 ```
 
-### Manual install
+### pip (manual)
 
 ```bash
 git clone https://github.com/twinboi90/pymanager.git
