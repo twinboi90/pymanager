@@ -1,15 +1,15 @@
 """
-pymanager — entry point.
+pyversion — entry point.
 
 Usage:
-    pymanager pip <pip-args>     # auto-sync env, then run pip
-    pymanager status             # show current project state
-    pymanager check              # validate everything is correct
-    pymanager versions           # list installed Python versions
-    pymanager cleanup            # find/remove orphaned venvs & Pythons
-    pymanager init               # set up a new project
-    pymanager --version          # print pymanager version
-    pymanager --help             # show this help
+    pyversion pip <pip-args>     # auto-sync env, then run pip
+    pyversion status             # show current project state
+    pyversion check              # validate everything is correct
+    pyversion versions           # list installed Python versions
+    pyversion cleanup            # find/remove orphaned venvs & Pythons
+    pyversion init               # set up a new project
+    pyversion --version          # print pyversion version
+    pyversion --help             # show this help
 """
 
 from __future__ import annotations
@@ -66,7 +66,7 @@ class PyManager:
 
     def pip_command(self, args: list[str]) -> int:
         """
-        Main entry for: pymanager pip <args>
+        Main entry for: pyversion pip <args>
 
         1. Detect required Python version
         2. Ensure Python is installed
@@ -185,11 +185,11 @@ class PyManager:
     # ------------------------------------------------------------------
 
     def cmd_status(self) -> int:
-        """Show a summary of the current project's pymanager state."""
+        """Show a summary of the current project's pyversion state."""
         cwd = Path.cwd()
         venv_path = cwd / ".venv"
 
-        print(bold("📊 pymanager status"))
+        print(bold("📊 pyversion status"))
         print()
 
         # Project
@@ -223,7 +223,7 @@ class PyManager:
             if info.get("last_used"):
                 print(f"  {bold('Last used:')}      {info['last_used']}")
         else:
-            print(f"  {bold('Virtual env:')}    {yellow('not created')} — run `pymanager pip install` to create")
+            print(f"  {bold('Virtual env:')}    {yellow('not created')} — run `pyversion pip install` to create")
 
         print()
         return 0
@@ -240,7 +240,7 @@ class PyManager:
         warnings: list[str] = []
         ok: list[str] = []
 
-        print(bold("🔎 pymanager check"))
+        print(bold("🔎 pyversion check"))
         print()
 
         # Check 1: Python requirement
@@ -256,7 +256,7 @@ class PyManager:
             python_path = self.version_mgr.get_path(required)
             ok.append(f"Python {required} available at {python_path}")
         except RuntimeError:
-            fatal.append(f"Python {required} not installed — run `pymanager pip install` to trigger install")
+            fatal.append(f"Python {required} not installed — run `pyversion pip install` to trigger install")
             python_path = None
 
         # Check 3–6: Full venv sync check
@@ -287,10 +287,10 @@ class PyManager:
 
         print()
         if fatal:
-            print(f"{red('❌')} {len(fatal)} issue(s) found. Run `pymanager pip install` to auto-fix.")
+            print(f"{red('❌')} {len(fatal)} issue(s) found. Run `pyversion pip install` to auto-fix.")
             return 1
         elif warnings:
-            print(f"{yellow('⚠')}  {len(warnings)} warning(s). Run `pymanager pip install` to repair.")
+            print(f"{yellow('⚠')}  {len(warnings)} warning(s). Run `pyversion pip install` to repair.")
             return 0
         else:
             print(f"{green('✅')} Everything looks good!")
@@ -301,14 +301,14 @@ class PyManager:
     # ------------------------------------------------------------------
 
     def cmd_versions(self) -> int:
-        """List installed Python versions managed by pymanager."""
-        print(bold("🐍 Installed Python versions (pymanager-managed)"))
+        """List installed Python versions managed by pyversion."""
+        print(bold("🐍 Installed Python versions (pyversion-managed)"))
         print()
 
         versions = self.version_mgr.list_installed()
         if not versions:
-            print(f"  {dim('No pymanager-managed Python versions installed.')}")
-            print(f"  {dim('Run `pymanager pip install` in a project to trigger an install.')}")
+            print(f"  {dim('No pyversion-managed Python versions installed.')}")
+            print(f"  {dim('Run `pyversion pip install` in a project to trigger an install.')}")
         else:
             for v in versions:
                 label = v["label"]
@@ -318,7 +318,7 @@ class PyManager:
 
         print()
         # Also show system Pythons for reference
-        print(dim("System Pythons (not managed by pymanager):"))
+        print(dim("System Pythons (not managed by pyversion):"))
         for candidate in ("python3.13", "python3.12", "python3.11", "python3.10", "python3.9", "python3"):
             found = shutil.which(candidate)
             if found:
@@ -340,7 +340,7 @@ class PyManager:
         """Find orphaned venvs and unused Python versions."""
         dry_run = "--dry-run" in sys.argv
 
-        print(bold("🧹 pymanager cleanup"))
+        print(bold("🧹 pyversion cleanup"))
         if dry_run:
             print(f"  {dim('(dry-run mode — nothing will be deleted)')}")
         print()
@@ -358,7 +358,7 @@ class PyManager:
         active_versions = registry.active_versions()
 
         if not versions:
-            print(f"  {dim('No pymanager-managed Python versions installed.')}")
+            print(f"  {dim('No pyversion-managed Python versions installed.')}")
             print(f"  {dim('Nothing to clean up.')}")
             print()
             return 0
@@ -457,7 +457,7 @@ class PyManager:
         cwd = Path.cwd()
         pv = cwd / ".python-version"
 
-        print(bold("🚀 pymanager init"))
+        print(bold("🚀 pyversion init"))
         print()
 
         if pv.exists():
@@ -494,7 +494,7 @@ class PyManager:
         pv.write_text(version + "\n")
         print(f"  {green('✅')} Created .python-version → {version}")
         print()
-        print(f"  Next: run {bold('pymanager pip install -r requirements.txt')} to set up your environment.")
+        print(f"  Next: run {bold('pyversion pip install -r requirements.txt')} to set up your environment.")
         return 0
 
     # ------------------------------------------------------------------
@@ -502,10 +502,10 @@ class PyManager:
     # ------------------------------------------------------------------
 
     def cmd_setup_path(self) -> int:
-        """Add pymanager's scripts directory to the user's shell PATH."""
+        """Add pyversion's scripts directory to the user's shell PATH."""
         import sysconfig
 
-        print(bold("🔧 pymanager setup-path"))
+        print(bold("🔧 pyversion setup-path"))
         print()
 
         # ── Detect scripts directory ──────────────────────────────────
@@ -522,7 +522,7 @@ class PyManager:
         if scripts_dir in current_path:
             print(f"  {green('✅')} Already on PATH — nothing to do!")
             print()
-            print(f"  Run {bold('pymanager --version')} to confirm.")
+            print(f"  Run {bold('pyversion --version')} to confirm.")
             return 0
 
         # ── Detect shell + RC file ────────────────────────────────────
@@ -544,7 +544,7 @@ class PyManager:
         # ── Write it ──────────────────────────────────────────────────
         try:
             with rc_path.open("a") as f:
-                f.write(f"\n# added by pymanager setup-path\n{path_line}\n")
+                f.write(f"\n# added by pyversion setup-path\n{path_line}\n")
         except OSError as e:
             print(f"  {red('❌')} Could not write to {rc_file}: {e}")
             print()
@@ -559,7 +559,7 @@ class PyManager:
         print(f"    {bold('source ' + rc_file)}")
         print()
         print(f"  Or open a new terminal, then run:")
-        print(f"    {bold('pymanager --version')}")
+        print(f"    {bold('pyversion --version')}")
         return 0
 
     def _find_scripts_dir(self) -> Optional[str]:
@@ -599,25 +599,25 @@ class PyManager:
 # ---------------------------------------------------------------------------
 
 HELP = f"""\
-{bold('pymanager')} v{__version__} — automatic Python version & virtualenv manager
+{bold('pyversion')} v{__version__} — automatic Python version & virtualenv manager
 
 {bold('Usage:')}
-  pymanager pip <args>     Run pip in the auto-synced environment
-  pymanager status         Show project Python/venv state
-  pymanager check          Validate environment is correct
-  pymanager versions       List pymanager-managed Python versions
-  pymanager cleanup        Show orphaned venvs / installed versions
-  pymanager init           Set up Python version for a new project
-  pymanager setup-path     Add pymanager to your shell PATH
-  pymanager --version      Print version
-  pymanager --help         Show this help
+  pyversion pip <args>     Run pip in the auto-synced environment
+  pyversion status         Show project Python/venv state
+  pyversion check          Validate environment is correct
+  pyversion versions       List pyversion-managed Python versions
+  pyversion cleanup        Show orphaned venvs / installed versions
+  pyversion init           Set up Python version for a new project
+  pyversion setup-path     Add pyversion to your shell PATH
+  pyversion --version      Print version
+  pyversion --help         Show this help
 
 {bold('Examples:')}
-  pymanager pip install requests
-  pymanager pip install -r requirements.txt
-  pymanager pip list
-  pymanager pip freeze > requirements.txt
-  pymanager pip install --upgrade mypackage
+  pyversion pip install requests
+  pyversion pip install -r requirements.txt
+  pyversion pip list
+  pyversion pip freeze > requirements.txt
+  pyversion pip install --upgrade mypackage
 
 {bold('How it works:')}
   1. Reads .python-version / pyproject.toml to detect required Python
@@ -629,7 +629,7 @@ HELP = f"""\
 
 
 def main() -> None:
-    # Force line-buffered stdout so pymanager prints appear before subprocess output.
+    # Force line-buffered stdout so pyversion prints appear before subprocess output.
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(line_buffering=True)
 
@@ -640,7 +640,7 @@ def main() -> None:
         sys.exit(0)
 
     if args[0] in ("--version", "-V"):
-        print(f"pymanager {__version__}")
+        print(f"pyversion {__version__}")
         sys.exit(0)
 
     manager = PyManager()

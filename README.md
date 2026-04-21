@@ -1,17 +1,17 @@
-# pymanager
+# pyversion
 
-[![PyPI version](https://img.shields.io/pypi/v/pymanager-cli.svg)](https://pypi.org/project/pymanager-cli/)
-[![Python versions](https://img.shields.io/pypi/pyversions/pymanager-cli.svg)](https://pypi.org/project/pymanager-cli/)
-[![CI](https://github.com/twinboi90/pymanager/actions/workflows/ci.yml/badge.svg)](https://github.com/twinboi90/pymanager/actions/workflows/ci.yml)
+[![PyPI version](https://img.shields.io/pypi/v/pyversion-cli.svg)](https://pypi.org/project/pyversion-cli/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pyversion-cli.svg)](https://pypi.org/project/pyversion-cli/)
+[![CI](https://github.com/twinboi90/pyversion/actions/workflows/ci.yml/badge.svg)](https://github.com/twinboi90/pyversion/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **One command. Any Python version. Zero configuration.**
 
 ```bash
-pymanager pip install requests
+pyversion pip install requests
 ```
 
-That's it. pymanager figures out which Python your project needs, installs it if missing, creates and validates the virtual environment, and runs pip — all automatically, every time.
+That's it. pyversion figures out which Python your project needs, installs it if missing, creates and validates the virtual environment, and runs pip — all automatically, every time.
 
 ---
 
@@ -55,7 +55,7 @@ This is the state of Python development in 2025. It's a rite of passage — and 
 
 ```bash
 $ cd project-a
-$ pymanager pip install -r requirements.txt
+$ pyversion pip install -r requirements.txt
 
 🔍 Detecting Python requirement...
    → Project requires Python 3.11 (from pyproject.toml)
@@ -79,7 +79,7 @@ Successfully installed requests-2.31.0 urllib3-2.0.0 certifi-2023.7.22
 
 ```bash
 $ cd ../project-b
-$ pymanager pip install -r requirements.txt
+$ pyversion pip install -r requirements.txt
 
 🔍 Detecting Python requirement...
    → Project requires Python 3.12 (from .python-version)
@@ -108,7 +108,7 @@ $ pymanager pip install -r requirements.txt
 ### Homebrew (recommended)
 
 ```bash
-brew install twinboi90/tap/pymanager
+brew install twinboi90/tap/pyversion
 ```
 
 That's it. No cloning, no PATH setup, no configuration. Homebrew handles everything.
@@ -116,23 +116,23 @@ That's it. No cloning, no PATH setup, no configuration. Homebrew handles everyth
 ### pip
 
 ```bash
-pip install pymanager-cli
+pip install pyversion-cli
 ```
 
-Then reload your shell (or open a new terminal window). The `pymanager` command will be available immediately.
+Then reload your shell (or open a new terminal window). The `pyversion` command will be available immediately.
 
-> **Note:** If `pymanager` isn't found after install, run `pymanager setup-path` to add it to your PATH automatically, then `source ~/.zshrc`.
+> **Note:** If `pyversion` isn't found after install, run `pyversion setup-path` to add it to your PATH automatically, then `source ~/.zshrc`.
 
 ### install.sh (no Homebrew, no pip)
 
 ```bash
-git clone https://github.com/twinboi90/pymanager.git
-cd pymanager
+git clone https://github.com/twinboi90/pyversion.git
+cd pyversion
 ./install.sh
 ```
 
 The installer:
-- Detects your Python and installs pymanager
+- Detects your Python and installs pyversion
 - Finds where pip put the script
 - Adds it to your shell's PATH automatically (`~/.zshrc`, `~/.bash_profile`, or `~/.config/fish/config.fish`)
 - Tells you exactly what it changed
@@ -146,18 +146,18 @@ source ~/.zshrc   # or ~/.bash_profile for bash
 ### pip (manual)
 
 ```bash
-git clone https://github.com/twinboi90/pymanager.git
-cd pymanager
+git clone https://github.com/twinboi90/pyversion.git
+cd pyversion
 pip install -e .
-pymanager setup-path   # adds pymanager to your PATH
+pyversion setup-path   # adds pyversion to your PATH
 source ~/.zshrc
 ```
 
 ### Verify
 
 ```bash
-pymanager --version
-# pymanager 0.1.0
+pyversion --version
+# pyversion 0.1.0
 ```
 
 ---
@@ -167,29 +167,29 @@ pymanager --version
 ### The main command
 
 ```bash
-pymanager pip <any pip args>
+pyversion pip <any pip args>
 ```
 
 Every pip subcommand works exactly as you'd expect:
 
 ```bash
-pymanager pip install requests
-pymanager pip install -r requirements.txt
-pymanager pip install --upgrade requests
-pymanager pip uninstall requests
-pymanager pip list
-pymanager pip freeze
-pymanager pip freeze > requirements.txt
-pymanager pip show requests
-pymanager pip install "django>=4.2,<5.0"
+pyversion pip install requests
+pyversion pip install -r requirements.txt
+pyversion pip install --upgrade requests
+pyversion pip uninstall requests
+pyversion pip list
+pyversion pip freeze
+pyversion pip freeze > requirements.txt
+pyversion pip show requests
+pyversion pip install "django>=4.2,<5.0"
 ```
 
 ### Project status
 
 ```bash
-$ pymanager status
+$ pyversion status
 
-📊 pymanager status
+📊 pyversion status
 
   Project dir:    /Users/you/projects/myapp
   Required Python: 3.11 (from project config)
@@ -202,9 +202,9 @@ $ pymanager status
 ### Health check
 
 ```bash
-$ pymanager check
+$ pyversion check
 
-🔎 pymanager check
+🔎 pyversion check
 
   ✅ Python requirement: 3.11
   ✅ Python 3.11 available at /usr/local/bin/python3.11
@@ -218,14 +218,14 @@ $ pymanager check
 ### Manage Python versions
 
 ```bash
-$ pymanager versions
+$ pyversion versions
 
-🐍 Installed Python versions (pymanager-managed)
+🐍 Installed Python versions (pyversion-managed)
 
-  ● Python 3.11 (3.11.10)  ~/.pymanager/versions/3.11/bin/python3
-  ● Python 3.12 (3.12.7)   ~/.pymanager/versions/3.12/bin/python3
+  ● Python 3.11 (3.11.10)  ~/.pyversion/versions/3.11/bin/python3
+  ● Python 3.12 (3.12.7)   ~/.pyversion/versions/3.12/bin/python3
 
-System Pythons (not managed by pymanager):
+System Pythons (not managed by pyversion):
   ○ python3.13 → 3.13.0  (/usr/local/bin/python3.13)
   ○ python3    → 3.13.0  (/usr/local/bin/python3)
 ```
@@ -233,9 +233,9 @@ System Pythons (not managed by pymanager):
 ### Clean up orphaned versions
 
 ```bash
-$ pymanager cleanup
+$ pyversion cleanup
 
-🧹 pymanager cleanup
+🧹 pyversion cleanup
 
   Managed Python versions:
 
@@ -257,15 +257,15 @@ $ pymanager cleanup
 Use `--dry-run` to preview without deleting anything:
 
 ```bash
-pymanager cleanup --dry-run
+pyversion cleanup --dry-run
 ```
 
 ### Initialize a new project
 
 ```bash
-$ pymanager init
+$ pyversion init
 
-🚀 pymanager init
+🚀 pyversion init
 
   Which Python version should this project use?
     1. Python 3.9
@@ -278,20 +278,20 @@ $ pymanager init
 
   ✅ Created .python-version → 3.12
 
-  Next: run pymanager pip install -r requirements.txt to set up your environment.
+  Next: run pyversion pip install -r requirements.txt to set up your environment.
 ```
 
 ### Fix PATH (if needed)
 
 ```bash
-pymanager setup-path
+pyversion setup-path
 ```
 
 ---
 
 ## How it works
 
-Every time you run `pymanager pip <args>`, six things happen automatically:
+Every time you run `pyversion pip <args>`, six things happen automatically:
 
 ```
 1. DETECT   Read .python-version or pyproject.toml
@@ -317,13 +317,13 @@ Every time you run `pymanager pip <args>`, six things happen automatically:
 5. RUN      Execute pip in the correct environment
             → .venv/bin/pip install requests
 
-6. TRACK    Register this project in ~/.pymanager/registry.json
+6. TRACK    Register this project in ~/.pyversion/registry.json
             → Powers cleanup's orphan detection
 ```
 
 ### Python version detection
 
-pymanager reads from these files, in priority order:
+pyversion reads from these files, in priority order:
 
 | File | Format | Example |
 |------|--------|---------|
@@ -337,18 +337,18 @@ All common PEP 440 specifiers are supported: `>=3.11`, `~=3.11.0`, `==3.11.*`, `
 
 ### Python installation
 
-When a required Python version isn't on your system, pymanager downloads a precompiled binary from [python-build-standalone](https://github.com/astral-sh/python-build-standalone) — the same source used by `uv` and `rye`.
+When a required Python version isn't on your system, pyversion downloads a precompiled binary from [python-build-standalone](https://github.com/astral-sh/python-build-standalone) — the same source used by `uv` and `rye`.
 
 - **No compilation** — prebuilt binaries, not source builds
 - **Fast** — typically under 30 seconds
 - **Cached** — subsequent installs of the same version skip the download
-- **Stored in** `~/.pymanager/versions/<version>/`
+- **Stored in** `~/.pyversion/versions/<version>/`
 
 Supports macOS on both Intel (`x86_64`) and Apple Silicon (`aarch64`).
 
 ### Venv sync detection
 
-pymanager detects 11 ways a virtual environment can be broken or out of date:
+pyversion detects 11 ways a virtual environment can be broken or out of date:
 
 | Issue | What it means |
 |-------|--------------|
@@ -362,9 +362,9 @@ pymanager detects 11 ways a virtual environment can be broken or out of date:
 | `cfg_version_mismatch` | `pyvenv.cfg` disagrees with the actual binary |
 | `home_python_gone` | The Python that created the venv no longer exists |
 | `pip_outdated` | pip version is below 22.0 |
-| `metadata_missing` | pymanager's tracking file is absent |
+| `metadata_missing` | pyversion's tracking file is absent |
 
-When any of the first nine are detected, pymanager automatically rebuilds the venv — saving your installed packages, recreating with the correct Python, and reinstalling. You never have to diagnose these manually.
+When any of the first nine are detected, pyversion automatically rebuilds the venv — saving your installed packages, recreating with the correct Python, and reinstalling. You never have to diagnose these manually.
 
 ---
 
@@ -375,7 +375,7 @@ When any of the first nine are detected, pymanager automatically rebuilds the ve
 ```bash
 $ git clone github.com/yourcompany/api-server
 $ cd api-server
-$ pymanager pip install -r requirements.txt
+$ pyversion pip install -r requirements.txt
 
 🔍 Detecting Python requirement...
    → Project requires Python 3.11 (from pyproject.toml)
@@ -384,7 +384,7 @@ $ pymanager pip install -r requirements.txt
    → Python 3.11 not found locally. Installing...
    → Downloading Python 3.11.10...
      [████████████████████] 100%
-   → Extracting to ~/.pymanager/versions/3.11...
+   → Extracting to ~/.pyversion/versions/3.11...
    → Verified: Python 3.11.10
    ✅ Python 3.11 installed
 
@@ -413,7 +413,7 @@ Successfully installed django-4.2.7 requests-2.31.0 psycopg2-2.9.7
 # Someone ran `python3.12 -m venv .venv` by mistake
 # but pyproject.toml says requires-python = ">=3.11,<3.12"
 
-$ pymanager pip install flask
+$ pyversion pip install flask
 
 📦 Setting up virtual environment...
    ⚠  Venv has issues — rebuilding:
@@ -438,17 +438,17 @@ $ pymanager pip install flask
 
 ```bash
 $ cd ~/projects/api-server        # requires Python 3.11
-$ pymanager pip list
+$ pyversion pip list
 ✅ Environment synced with Python 3.11.10
 ...
 
 $ cd ~/projects/ml-pipeline       # requires Python 3.12
-$ pymanager pip list
+$ pyversion pip list
 ✅ Environment synced with Python 3.12.7
 ...
 
 $ cd ~/projects/legacy-app        # requires Python 3.9
-$ pymanager pip install -r requirements.txt
+$ pyversion pip install -r requirements.txt
 ✅ Environment synced with Python 3.9.20
 ...
 ```
@@ -460,27 +460,27 @@ Zero manual activation. Zero version flags. Just `cd` and work.
 ## Why not just use...
 
 ### pyenv + venv
-pyenv is excellent at managing Python versions, but it doesn't manage virtual environments. You still have to create, activate, and maintain venvs manually. Forget to activate? Wrong packages. Switch projects? Re-activate. pymanager does all of this for you automatically.
+pyenv is excellent at managing Python versions, but it doesn't manage virtual environments. You still have to create, activate, and maintain venvs manually. Forget to activate? Wrong packages. Switch projects? Re-activate. pyversion does all of this for you automatically.
 
 ### Poetry
-Poetry is a full dependency manager with its own lock file format, its own CLI, and its own way of thinking about projects. It's powerful but requires adopting its entire workflow. pymanager wraps pip — no new concepts, no lock files, no configuration. If you know pip, you know pymanager.
+Poetry is a full dependency manager with its own lock file format, its own CLI, and its own way of thinking about projects. It's powerful but requires adopting its entire workflow. pyversion wraps pip — no new concepts, no lock files, no configuration. If you know pip, you know pyversion.
 
 ### conda
-conda is a complete package ecosystem designed for data science workloads. It's large, slow to solve environments, and installs a lot of infrastructure. pymanager is 500 lines of Python with zero dependencies beyond the stdlib.
+conda is a complete package ecosystem designed for data science workloads. It's large, slow to solve environments, and installs a lot of infrastructure. pyversion is 500 lines of Python with zero dependencies beyond the stdlib.
 
 ### uv
-uv is extremely fast and excellent at what it does. pymanager and uv aren't really competing — uv is a pip replacement, pymanager is an orchestration layer. They can coexist. That said, pymanager's goal is maximum simplicity: one command, no new mental model.
+uv is extremely fast and excellent at what it does. pyversion and uv aren't really competing — uv is a pip replacement, pyversion is an orchestration layer. They can coexist. That said, pyversion's goal is maximum simplicity: one command, no new mental model.
 
 ### Docker
-Docker solves environment isolation across machines and teams. pymanager solves it on your local machine. Both have their place.
+Docker solves environment isolation across machines and teams. pyversion solves it on your local machine. Both have their place.
 
 ---
 
 ## Project layout
 
 ```
-pymanager/
-├── pymanager/
+pyversion/
+├── pyversion/
 │   ├── __init__.py
 │   ├── __main__.py          # CLI entry point and command orchestration
 │   ├── version_manager.py   # Python version detection and installation
@@ -502,15 +502,15 @@ pymanager/
 ## Development
 
 ```bash
-git clone https://github.com/twinboi90/pymanager.git
-cd pymanager
+git clone https://github.com/twinboi90/pyversion.git
+cd pyversion
 pip install -e ".[dev]"
 
 # Run tests
 pytest
 
 # Run tests with coverage
-pytest --cov=pymanager --cov-report=term-missing
+pytest --cov=pyversion --cov-report=term-missing
 ```
 
 94 tests, zero external dependencies beyond the stdlib.
@@ -520,7 +520,7 @@ pytest --cov=pymanager --cov-report=term-missing
 ## Roadmap
 
 **Phase 1 ✅ — Core**
-- `pymanager pip` with full auto-orchestration
+- `pyversion pip` with full auto-orchestration
 - Config file detection (5 formats)
 - Precompiled Python installation
 - Virtual environment management
@@ -529,14 +529,14 @@ pytest --cov=pymanager --cov-report=term-missing
 **Phase 2 ✅ — Robustness**
 - 11-mode venv sync detection and auto-repair
 - Project registry for cleanup intelligence
-- Interactive `pymanager cleanup` with disk usage
+- Interactive `pyversion cleanup` with disk usage
 - 94-test suite
 
 **Phase 3 — Expansion** *(in progress)*
 - Windows PowerShell support
 - Linux support
 - IDE integration
-- `pymanager init` improvements
+- `pyversion init` improvements
 
 ---
 

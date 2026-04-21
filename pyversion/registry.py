@@ -1,7 +1,7 @@
 """
 Registry — tracks which projects use which Python versions.
 
-Stored at ~/.pymanager/registry.json.
+Stored at ~/.pyversion/registry.json.
 
 Entries are written each time `pymanager pip` runs successfully in a project.
 The cleanup command reads this to determine which Python versions are actively
@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Optional
 
 
-REGISTRY_PATH = Path.home() / ".pymanager" / "registry.json"
+REGISTRY_PATH = Path.home() / ".pyversion" / "registry.json"
 
 
 # ---------------------------------------------------------------------------

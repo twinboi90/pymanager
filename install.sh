@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install.sh — install pymanager and add it to your PATH
+# install.sh — install pyversion and add it to your PATH
 #
 # Usage:
 #   ./install.sh          # install and add to PATH
@@ -22,7 +22,7 @@ warn() { echo -e "  ${YELLOW}⚠${RESET}   $*"; }
 err()  { echo -e "  ${RED}❌${RESET}  $*" >&2; }
 info() { echo -e "  ${BOLD}→${RESET}  $*"; }
 
-echo -e "\n${BOLD}🔧 pymanager installer${RESET}\n"
+echo -e "\n${BOLD}🔧 pyversion installer${RESET}\n"
 
 # ── Step 1: Check Python ─────────────────────────────────────────────────────
 PYTHON=""
@@ -42,11 +42,11 @@ ok "Found $PYTHON ($PYTHON_VER)"
 
 # ── Step 2: pip install ───────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-info "Installing pymanager from $SCRIPT_DIR..."
+info "Installing pyversion from $SCRIPT_DIR..."
 
 if [[ $DRY_RUN -eq 0 ]]; then
   "$PYTHON" -m pip install --user -e "$SCRIPT_DIR" --quiet --no-warn-script-location
-  ok "pymanager installed"
+  ok "pyversion installed"
 else
   info "[dry-run] Would run: $PYTHON -m pip install --user -e $SCRIPT_DIR"
 fi
@@ -65,7 +65,7 @@ except Exception:
 if not d or not d.strip():
     import subprocess, re
     r = subprocess.run(
-        [sys.executable, "-m", "pip", "show", "pymanager"],
+        [sys.executable, "-m", "pip", "show", "pyversion"],
         capture_output=True, text=True
     )
     m = re.search(r"Location:\s*(.+)", r.stdout)
@@ -106,7 +106,7 @@ PYEOF
 
 if [[ -z "$SCRIPTS_DIR" ]]; then
   warn "Could not detect scripts directory. You may need to add pip's bin folder to PATH manually."
-  warn "Run: pymanager setup-path   (once you can run pymanager)"
+  warn "Run: pyversion setup-path   (once you can run pyversion)"
   exit 0
 fi
 
@@ -116,7 +116,7 @@ ok "Scripts directory: $SCRIPTS_DIR"
 if echo "$PATH" | tr ':' '\n' | grep -qxF "$SCRIPTS_DIR"; then
   ok "$SCRIPTS_DIR is already on PATH — nothing to do."
   echo ""
-  echo -e "  Run ${BOLD}pymanager --version${RESET} to verify.\n"
+  echo -e "  Run ${BOLD}pyversion --version${RESET} to verify.\n"
   exit 0
 fi
 
@@ -139,7 +139,7 @@ if [[ "$SHELL_NAME" == "fish" ]]; then
   PATH_LINE="fish_add_path \"$SCRIPTS_DIR\""
 fi
 
-MARKER="# added by pymanager installer"
+MARKER="# added by pyversion installer"
 
 if grep -qF "$SCRIPTS_DIR" "$RC_FILE" 2>/dev/null; then
   ok "$SCRIPTS_DIR already present in $RC_FILE"
@@ -162,7 +162,7 @@ export PATH="$SCRIPTS_DIR:$PATH"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
-echo -e "${BOLD}✅ pymanager is ready!${RESET}"
+echo -e "${BOLD}✅ pyversion is ready!${RESET}"
 echo ""
 
 if [[ $DRY_RUN -eq 0 ]]; then
@@ -170,7 +170,7 @@ if [[ $DRY_RUN -eq 0 ]]; then
   echo -e "    ${BOLD}source $RC_FILE${RESET}"
   echo ""
   echo -e "  Or open a new terminal tab — then try:"
-  echo -e "    ${BOLD}pymanager --version${RESET}"
-  echo -e "    ${BOLD}pymanager pip install requests${RESET}"
+  echo -e "    ${BOLD}pyversion --version${RESET}"
+  echo -e "    ${BOLD}pyversion pip install requests${RESET}"
 fi
 echo ""

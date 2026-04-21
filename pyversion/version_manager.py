@@ -1,7 +1,7 @@
 """
 VersionManager — detect, install, and locate Python versions.
 
-Install layout:  ~/.pymanager/versions/<version>/bin/python
+Install layout:  ~/.pyversion/versions/<version>/bin/python
 Download source: python.org precompiled installers (macOS pkg) or
                  python-build-standalone releases (fast, cross-platform).
 """
@@ -25,7 +25,7 @@ from typing import Optional
 # Constants
 # ---------------------------------------------------------------------------
 
-PYMANAGER_HOME = Path.home() / ".pymanager"
+PYMANAGER_HOME = Path.home() / ".pyversion"
 VERSIONS_DIR = PYMANAGER_HOME / "versions"
 CACHE_DIR = PYMANAGER_HOME / "cache"
 
@@ -269,7 +269,7 @@ class VersionManager:
         Return the path to the Python executable for the given version.
 
         Looks in (priority order):
-          1. ~/.pymanager/versions/<version>/bin/python
+          1. ~/.pyversion/versions/<version>/bin/python
           2. system: python3.<minor>, python3, python
         """
         managed = self._managed_python_path(version)
@@ -341,7 +341,7 @@ class VersionManager:
         return python_bin
 
     def _managed_python_path(self, version: str) -> Path:
-        """Return ~/.pymanager/versions/<minor>/bin/python3"""
+        """Return ~/.pyversion/versions/<minor>/bin/python3"""
         minor = self._to_minor(version)
         for name in ("python3", "python"):
             p = VERSIONS_DIR / minor / "bin" / name

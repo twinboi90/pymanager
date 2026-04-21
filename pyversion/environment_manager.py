@@ -2,7 +2,7 @@
 EnvironmentManager — create, validate, sync, and track virtual environments.
 
 Default venv location: <project_root>/.venv
-Metadata file:         <venv>/.pymanager-metadata  (tracks which Python built it)
+Metadata file:         <venv>/.pyversion-metadata  (tracks which Python built it)
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from typing import Optional
 class EnvironmentManager:
     """Manage .venv creation, sync-checking, and rebuilding."""
 
-    METADATA_FILE = ".pymanager-metadata"
+    METADATA_FILE = ".pyversion-metadata"
 
     # ------------------------------------------------------------------
     # Public API
@@ -63,7 +63,7 @@ class EnvironmentManager:
 
         Checks both:
           - The actual Python binary inside the venv
-          - The .pymanager-metadata file (fast path)
+          - The .pyversion-metadata file (fast path)
         """
         # Fast path: check metadata
         meta = self._read_metadata(venv_path)
@@ -97,7 +97,7 @@ class EnvironmentManager:
         saved_reqs: Optional[Path] = None
         venv_python = self._venv_python(venv_path)
         if venv_python.exists():
-            saved_reqs = venv_path.parent / ".pymanager-saved-reqs.txt"
+            saved_reqs = venv_path.parent / ".pyversion-saved-reqs.txt"
             result = subprocess.run(
                 [str(self._venv_pip(venv_path)), "freeze"],
                 capture_output=True,
