@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pymanager"
+version = "0.1.0"
+description = "Automatic Python version and virtualenv manager — one command that just works"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+[project.scripts]
+pymanager = "pymanager.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pymanager*"]
